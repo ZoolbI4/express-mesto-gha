@@ -17,7 +17,7 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Переданы некорректные данные при создании карточки');
+        next(new BadRequest('Переданы некорректные данные при создании карточки'));
       }
     })
     .catch(next);
@@ -28,7 +28,7 @@ const deleteCard = (req, res, next) => {
 
   return Cards.findById(cardId)
     .orFail(() => {
-      throw new NotFound('Карточка с указанным id не найдена');
+      throw new NotFound('Карточка с указанным _id не найдена');
     })
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
@@ -51,9 +51,7 @@ const likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные для постановки лайка'));
-      }
-      if (err.message === 'NotFound') {
-        next(new NotFound('Передан несуществующий id карточки'));
+        return;
       }
       next(err);
     });
@@ -71,9 +69,7 @@ const dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Переданы некорректные данные для снятия лайка'));
-      }
-      if (err.message === 'NotFound') {
-        next(new NotFound('Передан несуществующий id карточки'));
+        return;
       }
       next(err);
     });
